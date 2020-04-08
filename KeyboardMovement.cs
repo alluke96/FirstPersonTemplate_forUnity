@@ -1,39 +1,55 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class KeyboardMovement : MonoBehaviour
 {
+    //-----------------------------------------------------------------------------------------------------------------
+    // Public variables
+    //-----------------------------------------------------------------------------------------------------------------
     public CharacterController controller;
 
-    [SerializeField] private float speed = 12f;
-    [SerializeField] private float gravity = -9.81f;
-    [SerializeField] private float jumpHeight = 3f;
+    //-----------------------------------------------------------------------------------------------------------------
+    // Serialized fields
+    //-----------------------------------------------------------------------------------------------------------------
+    [Header("Dependencies")]
+    [SerializeField] private Transform _groundCheckGameObject;
+    [SerializeField] private LayerMask _groundLayer;
+    [Header("Settings")]
+    [SerializeField] private float _speed = 12f;
+    [SerializeField] private float _gravity = -9.81f;
+    [SerializeField] private float _jumpHeight = 3f;
+    [SerializeField] private float _groundDistance = 0.4f;
 
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundDistance = 0.4f;
-    [SerializeField] private LayerMask groundMask;
-    
-    Vector3 velocity;
-    private bool isGrounded;
-    
-    void Update()
+    //-----------------------------------------------------------------------------------------------------------------
+    // Non-serialized fields
+    //-----------------------------------------------------------------------------------------------------------------
+    private Vector3 _velocity;
+    private bool _isGrounded;
+
+    //-----------------------------------------------------------------------------------------------------------------
+    // Unity events
+    //-----------------------------------------------------------------------------------------------------------------
+    private void Update()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-
-        if (isGrounded && velocity.y < 0) velocity.y = -2f;
-        
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
         Vector3 move = transform.right * x + transform.forward * z;
+        controller.Move(Time.deltaTime * _speed * move);
 
-        controller.Move(Time.deltaTime * speed * move);
+        // Jump
+        CheckIfCharacterIsGrounded();
+        if (_isGrounded && _velocity.y < 0) _velocity.y = -2f;
+        if (Input.GetButtonDown("Jump") && _isGrounded) _velocity.y = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
+        _velocity.y += _gravity * Time.deltaTime;
+        controller.Move(_velocity * Time.deltaTime);
+    }
 
-        if (Input.GetButtonDown("Jump") && isGrounded) velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-
-        velocity.y += gravity * Time.deltaTime;
-
-        controller.Move(velocity * Time.deltaTime);
+    //-----------------------------------------------------------------------------------------------------------------
+    // Private methods
+    //-----------------------------------------------------------------------------------------------------------------
+    private bool CheckIfCharacterIsGrounded()
+    {
+        _isGrounded = Physics.CheckSphere(_groundCheckGameObject.position, _groundDistance, _groundLayer);
+        return _isGrounded;
     }
 }

@@ -1,31 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
-    public float mouseSensitivity = 100f;
+    //-----------------------------------------------------------------------------------------------------------------
+    // Serialized fields
+    //-----------------------------------------------------------------------------------------------------------------
+    [SerializeField] private float _mouseSensitivity = 100f;
+    [SerializeField] private Transform _playerBody;
 
-    public Transform playerBody;
-
-    private float xRotation = 0f;
-
-    void Start()
+    //-----------------------------------------------------------------------------------------------------------------
+    // Non-serialized fields
+    //-----------------------------------------------------------------------------------------------------------------
+    private float _xRotation = 0f;
+    
+    //-----------------------------------------------------------------------------------------------------------------
+    // Unity events
+    //-----------------------------------------------------------------------------------------------------------------
+    private void Start()
     {
+        Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * _mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * _mouseSensitivity * Time.deltaTime;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        _xRotation -= mouseY;
+        _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
 
         //transform.localRotation = Quaternion.Euler(xRotation, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-        transform.localRotation = Quaternion.Euler(xRotation, 0,0);
-        playerBody.Rotate(Vector3.up * mouseX);
+        transform.localRotation = Quaternion.Euler(_xRotation, 0,0);
+        _playerBody.Rotate(Vector3.up * mouseX);
     }
 }
